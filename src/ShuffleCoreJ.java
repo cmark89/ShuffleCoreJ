@@ -44,6 +44,7 @@ public class ShuffleCoreJ {
 		bottomPanel.add(shuffleButton);
 
 		mainLabel = new JLabel("ShuffleCoreJ", SwingConstants.CENTER);
+		mainLabel.setFont(new Font("sanserif", Font.BOLD, 24));
 
 		JPanel topPanel = new JPanel(new BorderLayout());
 		String[] deckArray = new String[availableDecks.size()];
@@ -205,7 +206,6 @@ public class ShuffleCoreJ {
 
 		mainLabel.setText(currentDeck.get(cardIndex));
 	}
-
 
 	// ---Listener classes---
 	class ShuffleButtonListener implements ActionListener {
