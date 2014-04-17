@@ -58,7 +58,7 @@ public class ShuffleCoreJOptions {
 			sizePanel.add(new JLabel("Text size: "));
 			sizePanel.add(sizeField);
 
-			removeCardsBox = new JCheckBox("Removed cards when selected", removeCardsWhenSelected);
+			removeCardsBox = new JCheckBox("Remove cards when selected", removeCardsWhenSelected);
 			mainPanel.add(msPanel);
 			mainPanel.add(sizePanel);
 			mainPanel.add(removeCardsBox);
