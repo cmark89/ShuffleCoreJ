@@ -19,7 +19,12 @@ public class ShuffleCoreJ {
 	boolean shuffling = false;
 
 	final String DECK_PATH = "Decks";
-	int shuffleTime = 100; // in MS
+
+	int shuffleSpeed = 100;
+	int fontSize = 30;
+
+	ShuffleCoreJOptions optionsWindow = null;
+	boolean removeCardsWhenSelected = true;
 	
 	public void setup() {
 		// Initialize the list with a blank element
@@ -30,13 +35,21 @@ public class ShuffleCoreJ {
 
 		fileCheck();
 		// read valid files
+		//readConfigValues();
 		setupGUI();
 	}
 
 	public void setupGUI() {
 		frame = new JFrame("ShuffleCoreJ");
-		frame.setSize(350,250);
+		frame.setSize(400,300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		// Setup options button
+		JPanel optionsPanel = new JPanel();
+		optionsPanel.setLayout(new BorderLayout());
+		JButton optionsButton = new JButton("Options");
+		optionsButton.addActionListener(new OptionsButtonListener());
+		optionsPanel.add(BorderLayout.EAST, optionsButton);
 
 		JPanel bottomPanel = new JPanel();
 		shuffleButton = new JButton("Shuffle");
@@ -44,13 +57,14 @@ public class ShuffleCoreJ {
 		bottomPanel.add(shuffleButton);
 
 		mainLabel = new JLabel("ShuffleCoreJ", SwingConstants.CENTER);
-		mainLabel.setFont(new Font("sanserif", Font.BOLD, 24));
+		mainLabel.setFont(new Font("sanserif", Font.BOLD, 30));
 
 		JPanel topPanel = new JPanel(new BorderLayout());
 		String[] deckArray = new String[availableDecks.size()];
 		deckSelect = new JComboBox<String>(availableDecks.toArray(
 			deckArray)); 
 		deckSelect.addActionListener(new DeckSelectActionListener());
+		topPanel.add(optionsPanel, BorderLayout.NORTH);
 		topPanel.add(BorderLayout.EAST, deckSelect);
 
 		frame.getContentPane().add(BorderLayout.SOUTH, bottomPanel);
@@ -140,11 +154,50 @@ public class ShuffleCoreJ {
 	}
 
 	private void resetDeck() {
-		// Make the current deck a copy of the current deck
+		// Make the current deck a copy of the loaded deck
 		currentDeck = new ArrayList<String>(loadedDeck);
 		System.out.println("Loaded deck: " + loadedDeck.size());
 		System.out.println("Current deck: " + currentDeck.size());
-		//shuffle(currentDeck);
+
+		// See if we want to shuffle
+		// if(randomizeOrder) { ...
+		
+		ArrayList<String> temp = new ArrayList<String>();
+		while(currentDeck.size() > 0) {
+			int index = (int)(Math.random() * currentDeck.size());
+			temp.add(currentDeck.get(index));
+			currentDeck.remove(index);
+		}
+
+		currentDeck = temp;
+	}
+
+
+	private void openOptionsWindow() {
+		if(optionsWindow == null) {
+			optionsWindow = new ShuffleCoreJOptions(this);
+		}
+	}
+
+	public void closeOptionsWindow() {
+		optionsWindow = null;
+	}
+
+	public void setShuffleSpeed(int speed) {
+		shuffleSpeed = speed;
+	}
+
+	public int getShuffleSpeed() { return shuffleSpeed; }
+	public int getFontSize() { return fontSize; }
+
+	public void setRemovingCards(boolean bool) {
+		removeCardsWhenSelected = bool;
+	}
+	public boolean getRemovingCards() { return removeCardsWhenSelected; }
+
+	public void setFontSize(int size) {
+		fontSize = size;
+		mainLabel.setFont(new Font("sanserif", Font.BOLD, size));
 	}
 
 	private void shuffle(ArrayList<String> list) {
@@ -166,6 +219,7 @@ public class ShuffleCoreJ {
 	}
 
 	private void startShuffling() {
+		mainLabel.setForeground(Color.black);
 		if(currentDeck.size() == 0) {
 			resetDeck();
 			System.out.println("CURRENT DECK IS SIZE 0");
@@ -181,9 +235,8 @@ public class ShuffleCoreJ {
 			int time = 0;
 			while(shuffling) {
 				try {
-					Thread.sleep(100);
-					time += 100;
-					if(time >= shuffleTime)
+					Thread.sleep(shuffleSpeed);
+					if(shuffling)
 						nextCard();	
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -194,9 +247,18 @@ public class ShuffleCoreJ {
 
 	private void stopShuffling() {
 		shuffling = false;
-		nextCard();
+		//nextCard();
 
 		// Set the label color to red!
+		mainLabel.setForeground(Color.red);
+
+		// Now remove this card from the deck if we have to
+		if(removeCardsWhenSelected) {
+			if(currentDeck.size() > 1)
+				currentDeck.remove(cardIndex);	
+			else
+				resetDeck();
+		}
 	}
 
 	private void nextCard() {
@@ -224,6 +286,14 @@ public class ShuffleCoreJ {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			loadDeck((String)deckSelect.getSelectedItem());	
+		}
+	}
+
+	class OptionsButtonListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// Open options window
+			openOptionsWindow();
 		}
 	}
 }
