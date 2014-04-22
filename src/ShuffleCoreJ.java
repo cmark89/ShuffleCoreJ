@@ -19,9 +19,14 @@ public class ShuffleCoreJ {
 	boolean shuffling = false;
 
 	final String DECK_PATH = "Decks";
+	final String CONFIG_PATH = "ShuffleCoreJ.config";
 
 	int shuffleSpeed = 100;
 	int fontSize = 30;
+
+	final int DEFAULT_SHUFFLE_SPEED = 100;
+	final int DEFAULT_FONT_SIZE = 30;
+	final boolean DEFAULT_REMOVE_CARDS = true;
 
 	ShuffleCoreJOptions optionsWindow = null;
 	boolean removeCardsWhenSelected = true;
@@ -33,10 +38,84 @@ public class ShuffleCoreJ {
 		currentDeck = new ArrayList<String>();
 		loadedDeck = new ArrayList<String>();
 
+		// Set up the default values in case the config is corrupt
+		shuffleSpeed = DEFAULT_SHUFFLE_SPEED;
+		fontSize = DEFAULT_FONT_SIZE;
+		removeCardsWhenSelected = DEFAULT_REMOVE_CARDS;
+
+		readConfig();
+
 		fileCheck();
-		// read valid files
-		//readConfigValues();
 		setupGUI();
+	}
+
+	private void readConfig() {
+		// Check to see if the file exists
+		File f = new File(CONFIG_PATH);
+		if(f.exists() && !f.isDirectory()) {
+			try {
+				BufferedReader br = 
+					new BufferedReader(new FileReader(f));
+				String s = "";
+				while((s = br.readLine()) != null) {
+					parseConfigLine(s);
+				}
+
+				br.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			// Create the default config file
+			createDefaultConfig();
+			readConfig();
+		}
+	}
+
+	private void createDefaultConfig() {
+		File f = new File(CONFIG_PATH);
+		try {
+			PrintWriter bw = new PrintWriter(
+				new FileWriter(f));
+		
+			bw.println("#---------------------------");
+			bw.println("# SHUFFLECOREJ CONFIGURATION");
+			bw.println("#---------------------------");
+			bw.println("");
+			bw.println("fontSize : " + DEFAULT_FONT_SIZE);
+			bw.println("shuffleSpeed: " + DEFAULT_SHUFFLE_SPEED);
+			bw.println("removeCards : " + 
+				Boolean.toString(DEFAULT_REMOVE_CARDS));
+
+			bw.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void parseConfigLine(String s) {
+		// Remove whitespace
+		String newS = s.replaceAll("\\s", "");
+		// Skip comment lines and blank lines
+		if(newS.length() <= 0 || newS.charAt(0) == '#')
+			return;
+
+		// Split into two parts on :
+		String[] subs = newS.split(":");
+		if(subs[0].equals("fontSize")) {
+			fontSize = Integer.parseInt(subs[1]);
+		}
+		if(subs[0].equals("shuffleSpeed")) {
+			shuffleSpeed = Integer.parseInt(subs[1]);
+		}
+		if(subs[0].equals("removeCards")) {
+			if(subs[1].equals("true")) {
+				removeCardsWhenSelected = true;
+			} else {
+				removeCardsWhenSelected = false;
+			}
+		}
 	}
 
 	public void setupGUI() {
