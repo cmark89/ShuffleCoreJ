@@ -67,12 +67,13 @@ public class ShuffleCoreJ {
 			}
 		} else {
 			// Create the default config file
-			createDefaultConfig();
+			writeConfig(DEFAULT_FONT_SIZE, DEFAULT_SHUFFLE_SPEED,
+					DEFAULT_REMOVE_CARDS);
 			readConfig();
 		}
 	}
 
-	private void createDefaultConfig() {
+	private void writeConfig(int size, int speed, boolean remove) {
 		File f = new File(CONFIG_PATH);
 		try {
 			PrintWriter bw = new PrintWriter(
@@ -82,10 +83,10 @@ public class ShuffleCoreJ {
 			bw.println("# SHUFFLECOREJ CONFIGURATION");
 			bw.println("#---------------------------");
 			bw.println("");
-			bw.println("fontSize : " + DEFAULT_FONT_SIZE);
-			bw.println("shuffleSpeed: " + DEFAULT_SHUFFLE_SPEED);
+			bw.println("fontSize : " + size);
+			bw.println("shuffleSpeed: " + speed);
 			bw.println("removeCards : " + 
-				Boolean.toString(DEFAULT_REMOVE_CARDS));
+				Boolean.toString(remove));
 
 			bw.close();
 
@@ -121,7 +122,7 @@ public class ShuffleCoreJ {
 	public void setupGUI() {
 		frame = new JFrame("ShuffleCoreJ");
 		frame.setSize(400,300);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
 		// Setup options button
 		JPanel optionsPanel = new JPanel();
@@ -149,6 +150,17 @@ public class ShuffleCoreJ {
 		frame.getContentPane().add(BorderLayout.SOUTH, bottomPanel);
 		frame.getContentPane().add(BorderLayout.NORTH, topPanel);
 		frame.getContentPane().add(BorderLayout.CENTER, mainLabel);
+
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// Force a config save
+				writeConfig(fontSize, shuffleSpeed, 
+					removeCardsWhenSelected );
+				frame.dispose();
+				System.exit(0);
+			}
+		});
 
 		frame.setVisible(true);
 	}
