@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class ShuffleCoreJ {
 	JFrame frame;
 	JButton shuffleButton;
+	JButton resetButton;
 	JLabel mainLabel;
 
 	int cardIndex = 0;
@@ -134,7 +135,16 @@ public class ShuffleCoreJ {
 		JPanel bottomPanel = new JPanel();
 		shuffleButton = new JButton("Shuffle");
 		shuffleButton.addActionListener(new ShuffleButtonListener());
+		shuffleButton.setPreferredSize(new Dimension(150, 40));
 		bottomPanel.add(shuffleButton);
+		resetButton = new JButton("Reset");
+		resetButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				resetDeck();
+			}
+		});
+		bottomPanel.add(resetButton);
 
 		mainLabel = new JLabel("ShuffleCoreJ", SwingConstants.CENTER);
 		mainLabel.setFont(new Font("sanserif", Font.BOLD, 30));
@@ -245,6 +255,9 @@ public class ShuffleCoreJ {
 	}
 
 	private void resetDeck() {
+		if(loadedDeck == null)
+			return;
+
 		// Make the current deck a copy of the loaded deck
 		currentDeck = new ArrayList<String>(loadedDeck);
 		System.out.println("Loaded deck: " + loadedDeck.size());
@@ -317,6 +330,7 @@ public class ShuffleCoreJ {
 		}
 
 		shuffling = true;
+		shuffleButton.setText("Stop");
 		Thread t = new Thread(new ThreadedShuffle());
 		t.start();
 	}
@@ -338,6 +352,7 @@ public class ShuffleCoreJ {
 
 	private void stopShuffling() {
 		shuffling = false;
+		shuffleButton.setText("Shuffle");
 		//nextCard();
 
 		// Set the label color to red!
